@@ -1,0 +1,158 @@
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Spel
+{
+    enum Tegel
+    {
+        Leeg, Blauw, Rood
+    }
+
+    class Scherm : Form
+    {
+        Button nieuwspel, help;
+        Panel paneel;
+        Label beurt;
+        const int vakX = 8;
+        const int vakY = 8;
+        public int[,] grid;
+        double[] X;
+        double[] Y;
+        public int aantal;
+        public int maxAantal = 1000;
+        const int diameter = 40;
+        Graphics g;
+        Tegel aanDeBeurt;
+
+
+        public Scherm()
+        {
+
+            this.Size = new Size(500, 600);
+            this.Text = "Reversi";
+            this.aantal = 0;
+            this.BackColor = Color.White;
+            this.X = new double[maxAantal];
+            this.Y = new double[maxAantal];
+
+            nieuwspel = new Button();
+            help = new Button();
+            paneel = new Panel();
+            beurt = new Label();
+
+            grid = new int[vakX, vakY];
+            aanDeBeurt = Tegel.Blauw;
+
+            nieuwspel.Location = new Point(10, 10);
+            nieuwspel.ClientSize = new Size(50, 50);
+            nieuwspel.Text = "Nieuw Spel";
+            nieuwspel.BackColor = Color.Blue;
+            nieuwspel.Click += nieuwspelklik;
+            this.Controls.Add(nieuwspel);
+
+            help.Location = new Point(70, 10);
+            help.ClientSize = new Size(50, 50);
+            help.Text = "Help";
+            help.BackColor = Color.Red;
+            this.Controls.Add(help);
+
+            paneel.Location = new Point(10, 70);
+            paneel.ClientSize = new Size(vakX * 50, vakY * 50);
+            paneel.Paint += TekenBord;
+            paneel.BackColor = Color.Black;
+            paneel.MouseClick += klik;
+            this.Controls.Add(paneel);
+
+            beurt.Location = new Point(150, 30);
+            beurt.Text = beurttekst();
+            beurt.Size = new Size(150, 50);
+            this.Controls.Add(beurt);
+            beurt.Invalidate();
+
+
+        }
+
+        void klik(object o, MouseEventArgs m)
+        {
+            if (this.aantal < maxAantal)
+            {
+                int vakx = (m.X - (m.X % 50)) / 50;
+                int vaky = (m.Y - (m.Y % 50)) / 50;
+
+                //check valid move
+
+                grid[vakx, vaky] = (int)aanDeBeurt;
+                if (aanDeBeurt == Tegel.Blauw)
+                    aanDeBeurt = Tegel.Rood;
+                else
+                    aanDeBeurt = Tegel.Blauw;
+                beurt.Text = beurttekst();
+                paneel.Invalidate();
+            }
+        }
+
+
+        void nieuwspelklik(object o, EventArgs e)
+        {
+            grid = new int[vakX, vakY];
+            //-1 wegens rekening houden met 0-based index
+            grid[(vakX / 2) - 1, (vakY / 2) - 1] = (int)Tegel.Blauw;
+            grid[(vakX / 2), (vakY / 2) - 1] = (int)Tegel.Rood;
+            grid[(vakX / 2) - 1, (vakY / 2)] = (int)Tegel.Rood;
+            grid[(vakX / 2), (vakY / 2)] = (int)Tegel.Blauw;
+            paneel.Invalidate();
+        }
+
+        void TekenBord(object o, PaintEventArgs p)
+        {
+            g = p.Graphics;
+            //teken lijnen
+            for (int t = 0; t < vakX; t++)
+                g.DrawLine(Pens.White, 50 * t, 0, 50 * t, vakY * 50 + 50);
+
+            for (int t = 0; t < vakY; t++)
+                g.DrawLine(Pens.White, 0, 50 * t, vakX * 50, 50 * t);
+
+
+
+            /*for (int t = 0; X[t] != 0 && t < maxAantal; t++)
+            {
+                if (Math.Pow(-1, t) == -1)
+                    g.FillEllipse(Brushes.Red, (float)X[t], (float)Y[t], diameter, diameter);
+                else
+                    g.FillEllipse(Brushes.Blue, (float)X[t], (float)Y[t], diameter, diameter);
+            }*/
+            for (int i = 0; i < vakX; i++)
+            {
+                for (int j = 0; j < vakY; j++)
+                {
+                    if (grid[i, j] == (int)Tegel.Blauw)
+                    {
+                        g.FillEllipse(Brushes.Blue, (i * 50) + 5, (j * 50) + 5, diameter, diameter);
+                    }
+                    else if (grid[i, j] == (int)Tegel.Rood)
+                    {
+                        g.FillEllipse(Brushes.Red, (i * 50) + 5, (j * 50) + 5, diameter, diameter);
+                    }
+                }
+            }
+        }
+
+        public string beurttekst()
+        {
+            string res;
+            if (aanDeBeurt==Tegel.Blauw)
+                res = "Blauw is aan de beurt";
+            else
+                res = "Rood is aan de beurt";
+            return res;
+
+        }
+
+    }
+}
