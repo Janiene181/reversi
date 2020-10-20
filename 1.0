@@ -8,6 +8,13 @@ using System.Windows.Forms;
 
 namespace Spel
 {
+    class Program
+    {
+        static void Main()
+        {
+            Application.Run(new Scherm());
+        }
+    }
     enum Tegel
     {
         Leeg, Blauw, Rood
@@ -146,7 +153,7 @@ namespace Spel
         public string beurttekst()
         {
             string res;
-            if (aanDeBeurt==Tegel.Blauw)
+            if (aanDeBeurt == Tegel.Blauw)
                 res = "Blauw is aan de beurt";
             else
                 res = "Rood is aan de beurt";
